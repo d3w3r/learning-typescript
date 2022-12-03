@@ -1,0 +1,4 @@
+/**/compiled/
+
+# All the object files
+*.o
