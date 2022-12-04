@@ -1,4 +1,2 @@
-/**/compiled/
-
-# All the object files
-*.o
+# This a recursive search for .js files
+*.js
