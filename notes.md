@@ -1,3 +1,5 @@
+- Types and interfaces are almost the same the key difference is that a type cannot be re-opened to add new
+  properties vs an interface which is always extendable
 - Javascrips has native data type called _bigint_ a bigint value can be created with the next ways.
 
   ```javascript
