@@ -1,3 +1,5 @@
+<https://www.typescriptlang.org/docs/handbook/2/functions.html#declaring-this-in-a-function>
+
 - In typescript i have a special syntax for removing or validate that a value is not a null or undefined this
   syntax is the next: `myname!.toUpperCase()` is the `!` exclamation mark before the property or method.
 - Types and interfaces are almost the same the key difference is that a type cannot be re-opened to add new
