@@ -1,3 +1,4 @@
+// This type definition in front the argument fn: is called is a "function type expresion"
 function greeterA(fn: (a: string) => void) {
   fn("Hello, World");
 }
@@ -9,15 +10,13 @@ function printToConsole(s: string) {
 greeterA(printToConsole);
 
 type GreetFunction = (a: string) => void;
-function greeterB(fn: GreetFunction) {
-  // ...
-}
 
-// This is a fuction that also has a property, this is way to declare it
+function greeterB(fn: GreetFunction) {}
 
+// This is another way of function definition with type declarations
 type DescribableFunction = {
   description: string;
-  (someArg: number): boolean; // this a function declaration
+  (someArg: number): boolean;
 }
 
 function doSomething(fn: DescribableFunction) {
@@ -26,214 +25,172 @@ function doSomething(fn: DescribableFunction) {
 
 type SomeObject = {};
 
+// This is the definition of the constructor function
 type SomeConstructor = {
   new (s: string): SomeObject;
 };
-function fn (ctor: SomeConstructor) {
-  return new ctor("Hello");
+
+function fnA(ctor: SomeConstructor) {
+  return new ctor("hello");
 }
 
-interface CallOrConstructor {
-  new (s: string): Date;
-  (n?: number): number;
+// This is a function that is a constructor an at the same time a normal function
+type CallOrConstruct = {
+  new (name: string): SomeObject;
+  (): string;
+};
+
+function fnMe(fn: CallOrConstruct) {
+  new fn("FirstFunction");
+  fn();
 }
 
 function firstElementA(arr: any[]) {
   return arr[0];
 }
 
-function firstElementB<Type>(arr: Type[]): Type | undefined {
+// This is a type parameter <Type>
+function firstElementB<Type>(arr: Type[]): Type {
   return arr[0];
 }
 
+// The type inferred is string
 const s = firstElementB(["a", "b", "c"]);
-const n = firstElementB([1, 2, 3]);
+// The type inferred is number
+const n = firstElementB([1, 2, 3, 4, 5]);
+// The type inferred is undefined
 const u = firstElementB([]);
 
-// The generics are aliases not only the value Type is allowed as i can see below
-function map<Input, Output>(arr: Input[], func: (arg: Input) => Output): Output[] {
-  return arr.map(func);
+// We dont have to specify the return type of each constant the type was inferred
+
+function map<Input, Output>(arr: Input[], fn: (a: Input) => Output): Output[] {
+  return arr.map(fn);
 }
 
-const parsed = map(["1", "2", "3"], (n) => parseInt(n));
+const parsed = map([1, 2, 3, 4, 5], (value) => String(value));
+// Note that TypeScript can infer both the type of the input and output with the
+// values specified as arguments
 
-
-// CONSTRAINTS TO GENERICS
-
-function longest<Type extends { length: number }>(a: Type, b: Type) {
-  if (a.length >= b.length) {
+function longest<Type extends { length: number }>(a: Type, b: Type): Type {
+  if (a.length > b.length)
     return a;
-  } else {
+  else
     return b;
-  }
 }
 
-const longerArray = longest([1, 2], [1, 2, 3]);
-const longerString = longest("alice", "bob");
-// const notOK = longest(10, 100); // This will thrown an error because the constraint says that every value
-// must have a property .length of type number but the numbers types doesn't have that property
+const a = longest([1, 2, 3], [1]);
+const b = longest("one", "three");
+// const c = longest("one", [1, 2, 4, 5]);
 
-function minimumLength<Type extends { length: number }>(
-  obj: Type,
-  minimum: number
-): Type {
+// function minimumLength<Type extends { length: number }>(obj: Type, minimum: number): { length: number } {
+function minimumLength<Type extends { length: number }>(obj: Type, minimum: number): Type {
   if (obj.length >= minimum) {
     return obj;
   } else {
-    // return { length: minimum };
-    obj.length = minimum;
     return obj;
+    // return { length: minimum }; // This looks a valid object because has the allowed structure
+    // but this code is not valid, because typescript and generic functions doesn't allow this kind
+    // of sintax, as the guide says:
+    // The problem is that the function promises to return the same kind of object as was passed in,
+    // not just some object matching the constraint.
   }
 }
 
-const arr = minimumLength([1, 2, 3], 6);
-console.log(arr.slice(0));
+// If the code was used in the wrong way the code will crash here becuase the returned type in this
+// case is { length: 6 } but the expected output is an array so when we access the method .slice the
+// code will crash.
+const arrA = minimumLength([1, 2, 3], 6);
+console.log(arrA.slice(0));
+// If the code was used in the wrong way the code will crash here becuase the returned type in this
+// case is { length: 6 } but the expected output is an array so when we access the method .slice the
+// code will crash.
 
-function combine<Type>(arr1: Type[], arr2: Type[]): Type[] {
+// This kind of generic function can conbine array of the same type and return an array of the same type also.
+function combineA<Type>(arr1: Type[], arr2: Type[]): Type[] {
   return arr1.concat(arr2);
 }
 
-// Normally it would be an error to call this function with mismatched arrays
-// const arr = combine([1, 2, 3], ["hello"]);
+// const arrB = combineA([1, 2, 3], ["Hello"]); // This is invalid because the arrays have different types
 
-// If you intended to do this, however, you could manually specify Type
-const arrB = combine<string | number>([1, 2, 3], ["hello"]);
+// With this we can specify the types that will be send into the function
+const arrC = combineA<number | string>([1, 2, 3], ["hello"]);
 
 
-// GUIDE LINES FOR WRITING GOOD GENERIC FUNCTIONS
-function firstElement1<Type>(arr: Type[]) {
+// GUIDELINES FOR WRITING GOOD GENERIC FUNCTIONS
+function firstElementC<Type>(arr: Type[]) {
   return arr[0];
 }
 
-function firstElement2<Type extends any[]>(arr: Type) {
+function firstElementD<Type extends any[]>(arr: Type) {
   return arr[0];
 }
 
 // a: number (good)
-const a = firstElement1([1, 2, 3]);
+const aa = firstElementC([1, 2, 3]);
 // b: any (bad)
-const b = firstElement2([1, 2, 3]);
+const bb = firstElementD([1, 2, 3]); 
 
-// Good
-function filter1<Type>(arr: Type[], func: (arg: Type) => boolean): Type[] {
+// (good)
+function filterA<Type>(arr: Type[], func: (arg: Type) => boolean): Type[] {
   return arr.filter(func);
 }
 
-// Bad
-function filter2<Type, Func extends (arg: Type) => boolean>(
+// (bad), because it has to generic arguments that are not related one with each other
+// the correct is that the function if it operates with the same type that function doesn't
+// must be a generic declaration, insted it must be a function argument to relate with the
+// other function arguments
+function filterB<Type, Func extends (arg: Type) => boolean>(
   arr: Type[],
   func: Func
 ): Type[] {
   return arr.filter(func);
 }
 
-// Bad
-function greetA<Str extends string>(s: Str) {
+// (Bad) the generic definition is not needed
+function greetC<Str extends string>(s: Str) {
   console.log("Hello, " + s);
 }
 
-greetA("world");
-
-// Good
-function greetBJ(s: string) {
+// (Good)
+function greetD(s: string) {
   console.log("Hello, " + s);
 }
 
 function fA(n: number) {
-  console.log(n.toFixed());
-  console.log(n.toFixed(3));
+  console.log(n.toFixed());  // arguments 0
+  console.log(n.toFixed(3)); // arguments 1
 }
 
-function fB(n?: number) {}
+function fB(x?: number) {}
 
-fB();
-fB(3);
+fB();   // OK
+fB(10); // OK
 
-declare function fC(x?: number): void;
+function fC(x = 10) {}
 
-fC();
-fC(10);
-fC(undefined);
+declare function fD(x?: number): void;
+fD();
+fD(10);
+fD(undefined); // Same as the first one
 
 function myForEachA(arr: any[], callback: (arg: any, index?: number) => void) {
   for (let i = 0; i < arr.length; i++) {
-    callback(arr[i], i);
+    callback(arr[i], i); // This implementation always uses the two arguments 
   }
 }
 
-myForEachA([1, 2, 3], (a) => console.log(a));
+// This is expected to work in this implementation
+myForEachA([1, 2, 3], (a) => console.log(a)); // But this definition doesn't uses the second argument
 myForEachA([1, 2, 3], (a, i) => console.log(a, i));
+// This is expected to work in this implementation
 
 function myForEachB(arr: any[], callback: (arg: any, index?: number) => void) {
   for (let i = 0; i < arr.length; i++) {
-    callback(arr[i]);
+    callback(arr[i]); // This definition always uses only one argument
   }
 }
 
-myForEachB([1, 2, 3], (a, i) => {
-  // console.log(i.toFixed); // The value i is posibly undefined
-});
-
-// This are called overload signatures
-function makeDate(timeStamp: number): Date;
-function makeDate(m: number, d: number, y: number): Date;
-function makeDate(mOrTimestamp: number, d?: number, y?: number): Date {
-  if (d !== undefined && y !== undefined) {
-    return new Date(y, mOrTimestamp, d);
-  } else {
-    return new Date(mOrTimestamp);
-  }
-};
-const d1 = makeDate(1245124);
-const d2 = makeDate(5, 5, 5);
-// const d3 = makeDate(1, 3);
-
-function fnA(x: string): void;
-function fnA() {
-  // ...
-}
-// fnA();
-
-function fnB(x: boolean): void;
-// function fnB(x: string): boolean; // this is an error that i still doesn't understand
-function fnB(x: boolean) {}
-
-function fnC(x: string): string;
-// function fnC(x: number): boolean; // this is an error that i still doesn't understand
-function fnC(x: string | number) {
-  return "oops";
-}
-
-function len(s: string): number;
-function len(arr: any[]): number
-function len(x: any) {
-  return x.length;
-}
-
-len("");
-len([0]);
-// len(Math.random() > 0.5 ? "hello" : [0]);
-
-function lenk(x: any[] | string) {
-  return x.length;
-}
-
-const user = {
-  id: 123,
-  admin: false,
-  becomeAdmin: function () {
-    this.admin = true
-  },
-};
-
-type User = { admin: boolean };
-declare function getDB(): DB;
-
-interface DB {
-  filterUsers(filter: (this: User) => boolean): User[];
-}
-
-const db = getDB();
-const admins = db.filterUsers(function (this: User) {
-  return this.admin;
+// This value b is possibly undefined
+myForEachB([1, 2, 3], (a, b) => {
+  // console.log(b.toFixed());
 });

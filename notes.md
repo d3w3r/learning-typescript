@@ -1,4 +1,4 @@
-<https://www.typescriptlang.org/docs/handbook/2/functions.html#declaring-this-in-a-function>
+<https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads>
 
 - In typescript i have a special syntax for removing or validate that a value is not a null or undefined this
   syntax is the next: `myname!.toUpperCase()` is the `!` exclamation mark before the property or method.
