@@ -194,3 +194,111 @@ function myForEachB(arr: any[], callback: (arg: any, index?: number) => void) {
 myForEachB([1, 2, 3], (a, b) => {
   // console.log(b.toFixed());
 });
+
+// Two overloads, these two signatures are called the overload signatures
+function makeDate(timestamp: number): Date;
+function makeDate(m: number, d: number, y: number): Date;
+// Two overloads, these two signatures are called the overload signatures
+function makeDate(mOrTimestamp: number, d?: number, y?: number): Date {
+  if (d !== undefined && y !== undefined) {
+    return new Date(y, mOrTimestamp, d);
+  } else {
+    return new Date(mOrTimestamp);
+  }
+}
+
+const d1 = makeDate(12345123);
+const d2 = makeDate(5, 5, 5);
+// const d3 = makeDate(1, 3); // this is not defined in the overload signatures for this function
+
+// Overload Signatures and the implementation Signature
+// (Good) function signatures
+// function fn(x: string): void;
+// (Bad) Implementation signature
+// function fn() { // This is a bad implementation signature
+//   // ...
+// }
+
+// (Good) function signatures
+// function fn(): void;
+// function fn(x: string): void;
+// (Good) Implementation signature
+// function fn(x?: string) {}
+
+// fn(); // this one function is not defined in the overload signatures for this function
+
+// (Good) function signature 
+// function fn(x: boolean): void;
+// function fn(x: string): void; // This will throw one error becuase the implementation signature doesn't match
+// (Bad) implementation signature
+// function fn(x: boolean) {}
+
+// (Good) function signature 
+// function fn(x: boolean): void;
+// function fn(x: string): void; // This will throw one error becuase the implementation signature doesn't match
+// (Good) implementation signature
+// function fn(x: boolean | string) {}
+
+// (Good) function signature 
+// function fn(x: string): string;
+// function fn(x: number): boolean; // This return in the function signature is not guaranteed
+// (Bad) implementation signature
+// function fn(x: string | number) {
+//   return "Ops"; // This is only one return
+// }
+
+// (Good) function signature 
+// function fn(x: string): string;
+// function fn(x: number): boolean;
+// (Good) implementation signature
+// function fn(x: string | number): string | boolean {
+//   if (typeof x === "string") {
+//     return "Helllo"
+//   } 
+//   if (typeof x === "number") {
+//     return true;
+//   }
+//   return "";
+// }
+
+function len(s: string): number;
+function len(arr: any[]): number;
+function len(x: any) {
+  return x.length();
+}
+
+len("");
+len([0]);
+// len(Math.random() > 0.5 ? "hello" : [0]); // this values are taken literally not by its types
+// also this is because both have the same count and the same type of return value
+// we can instead write a non-overloaded version of the function
+
+function leng(s: string | any[]): number {
+  return s.length;
+}
+
+interface User {
+  id: number;
+  admin: boolean;
+  becomeAdmin: object;
+}
+
+const user = {
+  id: 123,
+  admin: false,
+  becomeAdmin: function () {
+    this.admin = true;
+  },
+}
+
+function getDB() { return {} as DB; }
+
+interface DB {
+  filterUsers(filter: (this: User) => boolean): User[];
+}
+
+const db = getDB();
+
+db.filterUsers(function (this: User) {
+  return this.admin;
+});
